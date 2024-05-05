@@ -76,9 +76,6 @@ public class StakingProfitCalculator {
             if (reinvestRewards) {
                 investment += monthlyReward;
             }
-//            else {
-//                investment = initialInvestment;
-//            }
         }
         return schedule;
     }
