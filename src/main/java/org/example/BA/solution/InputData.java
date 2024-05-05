@@ -1,6 +1,7 @@
 package org.example.BA.solution;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class InputData {
@@ -19,35 +20,29 @@ public class InputData {
         Scanner scanner = new Scanner(System.in);
         InputData inputData = new InputData();
 
-        System.out.println("Enter initial investment amount of ETH: ");
-        inputData.setInitialInvestment(scanner.nextDouble());
+        inputData.setInitialInvestment(readValidPositiveDoubleInput(scanner,
+                "Enter initial investment amount of ETH: "));
 
-        System.out.println("Enter yearly staking reward rate in %: ");
-        inputData.setYearlyRate(scanner.nextDouble() / 100);
+        inputData.setYearlyRate(readValidPositiveDoubleInput(scanner,
+                "Enter yearly staking reward rate in %: "));
 
-        System.out.println("Enter staking start date (YYYY-MM-DD): ");
-        inputData.setStartDate(LocalDate.parse(scanner.next()));
+        inputData.setStartDate(readValidDateInput(scanner,
+                "Enter staking start date (YYYY-MM-DD): "));
 
-        System.out.println("Enter staking duration in months: ");
-        inputData.setStakingDurationInMonths(scanner.nextInt());
+        inputData.setStakingDurationInMonths(readValidPositiveIntegerInput(scanner,
+                "Enter staking duration in months: "));
 
-        System.out.println("Enter reward payment day: ");
-        inputData.setRewardDay(scanner.nextInt());
+        inputData.setRewardDay(readValidRewardDayInput(scanner,
+                "Enter reward payment day: "));
 
-        System.out.println("Do you want to reinvest staking rewards? (yes/no): ");
-        inputData.setReinvestRewards(scanner.next().equalsIgnoreCase("yes"));
+        inputData.setReinvestRewards(readReinvestRewardsInput(scanner,
+                "Do you want to reinvest staking rewards? (yes/no): "));
 
 
-        System.out.println("Do you want to provide additional data (start date and yearly rate)? (yes/no): ");
-        inputData.setAdditionalDataRequested(scanner.next().equalsIgnoreCase("yes"));
+        inputData.setAdditionalDataRequested(readAdditionalDataRequestInput(scanner,
+                "Do you want to provide additional data (start date and yearly rate)? (yes/no): "));
 
-        if (inputData.isAdditionalDataRequested()) {
-            System.out.println("Enter additional date (YYYY-MM-DD): ");
-            inputData.setAdjustedDate(LocalDate.parse(scanner.next()));
-
-            System.out.println("Enter additional yearly staking reward rate in %: ");
-            inputData.setAdjustedYearlyRate(scanner.nextDouble() / 100);
-        }
+        handleAdditionalDataInput(inputData,new Scanner(System.in));
 
         scanner.close();
 
@@ -125,5 +120,169 @@ public class InputData {
     public void setReinvestRewards(boolean reinvestRewards) {
         this.reinvestRewards = reinvestRewards;
     }
+    public static double readValidPositiveDoubleInput(Scanner scanner, String prompt) {
+        double result = 0.0;
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            System.out.print(prompt);
+            if (scanner.hasNextDouble()) {
+                result = scanner.nextDouble();
+                if (result > 0) {
+                    isValidInput = true;
+                } else {
+                    System.out.println("\tInvalid input! Please enter a positive number.");
+                }
+            } else {
+                System.out.println("\tInvalid input! Please enter a valid number.");
+                scanner.next();
+            }
+        }
+        return result/100;
+    }
+
+    public static LocalDate readValidDateInput(Scanner scanner, String prompt) {
+        LocalDate result = null;
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            System.out.print(prompt);
+            String input = scanner.next();
+            try {
+                result = LocalDate.parse(input);
+                isValidInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("\tInvalid input! Please enter a valid date in the format YYYY-MM-DD.");
+            }
+        }
+        return result;
+    }
+    public static int readValidPositiveIntegerInput(Scanner scanner, String prompt) {
+        int result = 0;
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                result = scanner.nextInt();
+                if (result > 0) {
+                    isValidInput = true;
+                } else {
+                    System.out.println("\tInvalid input! Please enter a positive integer greater than 0.");
+                }
+            } else {
+                System.out.println("\tInvalid input! Please enter a valid positive integer greater than 0.");
+                scanner.next();
+            }
+        }
+        return result;
+    }
+    public static int readValidRewardDayInput(Scanner scanner, String prompt) {
+        int result = 0;
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                result = scanner.nextInt();
+                if (result > 0 && result < 32) {
+                    isValidInput = true;
+                    if (result > 28) {
+                        System.out.println("\tNote: This day may differ for February and later months.");
+                    }
+                } else {
+                    System.out.println("\tInvalid input! Please enter a positive integer between 1 and 31.");
+                }
+            } else {
+                System.out.println("\tInvalid input! Please enter a valid positive integer between 1 and 31.");
+                scanner.next();
+            }
+        }
+        return result;
+    }
+    public static boolean readReinvestRewardsInput(Scanner scanner, String prompt) {
+        boolean reinvestRewards = false;
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            System.out.print(prompt);
+            String input = scanner.next().toLowerCase();
+            if (input.equals("yes")) {
+                reinvestRewards = true;
+                isValidInput = true;
+            } else if (input.equals("no")) {
+                isValidInput = true;
+            } else {
+                System.out.println("\tInvalid input! Please enter 'yes' or 'no'.");
+            }
+        }
+        return reinvestRewards;
+    }
+    public static boolean readAdditionalDataRequestInput(Scanner scanner, String prompt) {
+        boolean additionalDataRequested = false;
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            System.out.print(prompt);
+            String input = scanner.next().toLowerCase();
+            if (input.equals("yes")) {
+                additionalDataRequested = true;
+                isValidInput = true;
+            } else if (input.equals("no")) {
+                isValidInput = true;
+            } else {
+                System.out.println("\tInvalid input! Please enter 'yes' or 'no'.");
+            }
+        }
+        return additionalDataRequested;
+    }
+
+    public static void handleAdditionalDataInput(InputData inputData, Scanner scanner) {
+        if (inputData.isAdditionalDataRequested()) {
+            System.out.println("Enter additional date (YYYY-MM-DD): ");
+            inputData.setAdjustedDate(readValidDateInput(scanner));
+
+            System.out.println("Enter additional yearly staking reward rate in %: ");
+            inputData.setAdjustedYearlyRate(readValidYearlyRateInput(scanner));
+        }
+    }
+
+    private static LocalDate readValidDateInput(Scanner scanner) {
+        boolean isValidInput = false;
+        LocalDate date = null;
+
+        while (!isValidInput) {
+            try {
+                date = LocalDate.parse(scanner.next());
+                isValidInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("\tInvalid date format! Please enter the date in YYYY-MM-DD format.");
+            }
+        }
+        return date;
+    }
+
+    private static double readValidYearlyRateInput(Scanner scanner) {
+        boolean isValidInput = false;
+        double yearlyRate = 0.0;
+
+        while (!isValidInput) {
+            System.out.println("\tEnter additional yearly staking reward rate in %: ");
+            if (scanner.hasNextDouble()) {
+                yearlyRate = scanner.nextDouble();
+                if (yearlyRate > 0) {
+                    isValidInput = true;
+                } else {
+                    System.out.println("\tInvalid input! Yearly rate must be greater than 0.");
+                }
+            } else {
+                System.out.println("\tInvalid input! Please enter a valid number.");
+                scanner.next();
+            }
+        }
+        return yearlyRate / 100;
+    }
+
+
 }
 
