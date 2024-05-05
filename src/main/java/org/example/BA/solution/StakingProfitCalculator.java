@@ -1,14 +1,12 @@
 package org.example.BA.solution;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StakingProfitCalculator {
-    public static void main(String[] args) {
+    public static void run() {
         InputData inputData = InputData.getInputDataFromUser();
 
         double initialInvestment = inputData.getInitialInvestment();
@@ -29,7 +27,7 @@ public class StakingProfitCalculator {
                 stakingDurationInMonths,
                 rewardDay,
                 reinvestRewards);
-        generateCsvFile(profitSchedule,
+        CsvFileGenerator.generateCsvFile(profitSchedule,
                 "ETH_profit_schedule.csv");
     }
 
@@ -50,16 +48,19 @@ public class StakingProfitCalculator {
         for (int line = 1; line <= stakingDurationInMonths; line++) {
 
             startDate = nextRewardDate;
-            double monthlyReward;
+            double monthlyReward = calculateMonthlyReward(
+                    initialInvestment,
+                    yearlyRate,
+                    adjustedYearlyRate,
+                    adjustedDate,
+                    nextRewardDate,
+                    daysBetween);
 
-            if (adjustedDate != null && nextRewardDate.isAfter(adjustedDate)) {
-                int daysBetweenOldAndNewDate = Math.toIntExact(ChronoUnit.DAYS.between(adjustedDate, nextRewardDate));
-                monthlyReward = daysBetweenOldAndNewDate * calculateDailyReward(initialInvestment, adjustedYearlyRate)
-                        + (daysBetween - daysBetweenOldAndNewDate) * calculateDailyReward(initialInvestment, yearlyRate);
-                yearlyRate = adjustedYearlyRate;
-            } else {
-                monthlyReward = daysBetween * calculateDailyReward(initialInvestment, yearlyRate);
-            }
+            yearlyRate = getActualYearlyRate(
+                    nextRewardDate,
+                    adjustedDate,
+                    yearlyRate,
+                    adjustedYearlyRate);
 
             double totalReward = calculateTotalReward(schedule);
             schedule.add(new ProfitRecord(
@@ -74,9 +75,10 @@ public class StakingProfitCalculator {
             daysBetween = Math.toIntExact(ChronoUnit.DAYS.between(startDate, nextRewardDate));
             if (reinvestRewards) {
                 investment += monthlyReward;
-            } else {
-                investment = initialInvestment;
             }
+//            else {
+//                investment = initialInvestment;
+//            }
         }
         return schedule;
     }
@@ -91,10 +93,6 @@ public class StakingProfitCalculator {
         return currentRewardDate.plusMonths(addOneMonth);
     }
 
-    public static LocalDate getEndRewardDate(LocalDate currentRewardDate, int stakingDurationInMonths) {
-        return currentRewardDate.plusMonths(stakingDurationInMonths);
-    }
-
     public static double calculateTotalReward(List<ProfitRecord> schedule) {
         double totalReward = 0.0;
         for (ProfitRecord record : schedule) {
@@ -103,25 +101,32 @@ public class StakingProfitCalculator {
         return totalReward;
     }
 
-    public static void generateCsvFile(List<ProfitRecord> schedule,
-                                       String filePath) {
-        try (FileWriter writer = new FileWriter(filePath)) {
-            writer.write("Line #,Reward Date,Investment Amount,Reward Amount,Total Reward Amount Till that date, Staking Reward Rate\n");
-            for (ProfitRecord month : schedule) {
-                writer.write(String.format("%d,%s,%.6f,%.6f,%.6f,%.2f%%\n",
-                        month.lineNumber(),
-                        month.rewardDate(),
-                        month.investmentAmount(),
-                        month.rewardAmount(),
-                        month.totalRewardAmount(),
-                        month.yearlyStakingRewardRate() * 100));
-            }
-            writer.write("\n");
-            System.out.println("CSV file generated successfully.");
-            System.out.println();
-        } catch (IOException e) {
-            System.out.println("Something goes wrong with IO!");//Gal cia kazka dar galima bus pasikorteguot
+    public static double calculateMonthlyReward(double initialInvestment,
+                                                double yearlyRate,
+                                                double adjustedYearlyRate,
+
+                                                LocalDate adjustedDate,
+                                                LocalDate nextRewardDate,
+                                                int daysBetween) {
+        double monthlyReward;
+
+        if (adjustedDate != null && nextRewardDate.isAfter(adjustedDate)) {
+            int daysBetweenOldAndNewDate = Math.toIntExact(ChronoUnit.DAYS.between(adjustedDate, nextRewardDate));
+            monthlyReward = daysBetweenOldAndNewDate * calculateDailyReward(initialInvestment, adjustedYearlyRate)
+                    + (daysBetween - daysBetweenOldAndNewDate) * calculateDailyReward(initialInvestment, yearlyRate);
+        } else {
+            monthlyReward = daysBetween * calculateDailyReward(initialInvestment, yearlyRate);
         }
+        return monthlyReward;
     }
+
+    public static double getActualYearlyRate(LocalDate nextRewardDate, LocalDate adjustedDate, double yearlyRate, double adjustedYearlyRate) {
+        if (adjustedDate != null && nextRewardDate.isAfter(adjustedDate)) {
+            yearlyRate = adjustedYearlyRate;
+            return yearlyRate;
+        }
+        return yearlyRate;
+    }
+
 }
 
