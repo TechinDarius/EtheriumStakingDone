@@ -22,7 +22,7 @@ public class CsvFileGenerator {
             System.out.println("CSV file generated successfully.");
             System.out.println();
         } catch (IOException e) {
-            System.out.println("Something goes wrong with IO!");//Gal cia kazka dar galima bus pasikorteguot
+            System.out.println("Something goes wrong with IO!");
         }
     }
 }

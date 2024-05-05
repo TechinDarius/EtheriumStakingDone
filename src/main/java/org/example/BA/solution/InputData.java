@@ -35,11 +35,11 @@ public class InputData {
         inputData.setRewardDay(readValidRewardDayInput(scanner,
                 "Enter reward payment day: "));
 
-        inputData.setReinvestRewards(readReinvestRewardsInput(scanner,
+        inputData.setReinvestRewards(readBooleanDataInput(scanner,
                 "Do you want to reinvest staking rewards? (yes/no): "));
 
 
-        inputData.setAdditionalDataRequested(readAdditionalDataRequestInput(scanner,
+        inputData.setAdditionalDataRequested(readBooleanDataInput(scanner,
                 "Do you want to provide additional data (start date and yearly rate)? (yes/no): "));
 
         handleAdditionalDataInput(inputData,new Scanner(System.in));
@@ -200,25 +200,8 @@ public class InputData {
         }
         return result;
     }
-    public static boolean readReinvestRewardsInput(Scanner scanner, String prompt) {
-        boolean reinvestRewards = false;
-        boolean isValidInput = false;
 
-        while (!isValidInput) {
-            System.out.print(prompt);
-            String input = scanner.next().toLowerCase();
-            if (input.equals("yes")) {
-                reinvestRewards = true;
-                isValidInput = true;
-            } else if (input.equals("no")) {
-                isValidInput = true;
-            } else {
-                System.out.println("\tInvalid input! Please enter 'yes' or 'no'.");
-            }
-        }
-        return reinvestRewards;
-    }
-    public static boolean readAdditionalDataRequestInput(Scanner scanner, String prompt) {
+    public static boolean readBooleanDataInput(Scanner scanner, String prompt) {
         boolean additionalDataRequested = false;
         boolean isValidInput = false;
 
