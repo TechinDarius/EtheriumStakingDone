@@ -30,12 +30,7 @@ public class StakingProfitCalculator {
                 rewardDay,
                 reinvestRewards);
         generateCsvFile(profitSchedule,
-                "ETH_profit_schedule.csv",
-                initialInvestment,
-                yearlyRate,
-                startDate,
-                getEndRewardDate(startDate, stakingDurationInMonths),
-                reinvestRewards);
+                "ETH_profit_schedule.csv");
     }
 
     public static List<ProfitRecord> calculateProfitSchedule(double initialInvestment,
@@ -60,7 +55,7 @@ public class StakingProfitCalculator {
             if (adjustedDate != null && nextRewardDate.isAfter(adjustedDate)) {
                 int daysBetweenOldAndNewDate = Math.toIntExact(ChronoUnit.DAYS.between(adjustedDate, nextRewardDate));
                 monthlyReward = daysBetweenOldAndNewDate * calculateDailyReward(initialInvestment, adjustedYearlyRate)
-                        +(daysBetween-daysBetweenOldAndNewDate) * calculateDailyReward(initialInvestment, yearlyRate);
+                        + (daysBetween - daysBetweenOldAndNewDate) * calculateDailyReward(initialInvestment, yearlyRate);
                 yearlyRate = adjustedYearlyRate;
             } else {
                 monthlyReward = daysBetween * calculateDailyReward(initialInvestment, yearlyRate);
@@ -109,13 +104,7 @@ public class StakingProfitCalculator {
     }
 
     public static void generateCsvFile(List<ProfitRecord> schedule,
-                                       String filePath,
-                                       double initialInvestment,
-                                       double yearlyRate,
-                                       LocalDate startDate,
-                                       LocalDate endDate,
-                                       boolean reinvestRewards
-    ) {
+                                       String filePath) {
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write("Line #,Reward Date,Investment Amount,Reward Amount,Total Reward Amount Till that date, Staking Reward Rate\n");
             for (ProfitRecord month : schedule) {
@@ -128,11 +117,6 @@ public class StakingProfitCalculator {
                         month.yearlyStakingRewardRate() * 100));
             }
             writer.write("\n");
-//            writer.write("Initial_Investment:," + initialInvestment + "\n");
-//            writer.write("Yearly_Staking_Reward_Rate:," + yearlyRate + "\n");
-//            writer.write("Start_date:," + startDate + "\n");
-//            writer.write("End_date:," + endDate + "\n");
-//            writer.write("Reinvest:," + (reinvestRewards?"yes":"no" )+ "\n");
             System.out.println("CSV file generated successfully.");
             System.out.println();
         } catch (IOException e) {
