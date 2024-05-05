@@ -28,7 +28,7 @@ public class StakingProfitCalculator {
                 rewardDay,
                 reinvestRewards);
         CsvFileGenerator.generateCsvFile(profitSchedule,
-                "ETH_profit_schedule.csv");
+                "ETH_Staking_monthly_profit_schedule.csv");
     }
 
     public static List<ProfitRecord> calculateProfitSchedule(double initialInvestment,
